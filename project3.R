@@ -63,7 +63,11 @@ smq_2017 <- nhanes("SMQ_J") %>%
                               SMQ020 == 2 ~ 0)) %>%
   select(SEQN, CURSMOKE)
 bpq_2017 <- nhanes("BPQ_J") %>% 
-  mutate(BPMEDS = ifelse(BPQ050A == 1, 1, 0)) %>%
+  mutate(BPMEDS = case_when(
+    BPQ020 == 2 ~ 0,
+    BPQ040A == 2 ~ 0,
+    BPQ050A == 1 ~ 1,
+    TRUE ~ NA )) %>%
   select(SEQN, BPMEDS) 
 tchol_2017 <- nhanes("TCHOL_J") %>% 
   select(SEQN, LBXTC) %>% 
