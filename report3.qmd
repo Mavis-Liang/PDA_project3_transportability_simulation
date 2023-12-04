@@ -11,7 +11,6 @@ editor: visual
 bibliography: cite.bib
 ---
 
-
 ```{r setup, warning = FALSE, message = FALSE,echo = FALSE}
 library(riskCommunicator)
 library(nhanesA)
@@ -30,6 +29,8 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE,
 
 This study evaluates the transportability of a cardiovascular risk model developed using Framingham data and applied to NHANES data and its simulated datasets under three different settings. Through statistical analyses, we used Estimated Brier Scores to investigates the model's adaptability to different population datasets. While we found that the NHANES population is slightly healthier than the Framingham population, the transportibility between the two populations appears well. The transportibilies in the simulations with the summary statistics of the NHANES data with or without prior knowledge informed by the Framingham data also performs well. The study highlight the the robustness of the transpotibility measurement in new target populations using only summary data, which can provide analytical results for researchers and governments without assessing the real data.
 
+Link: [Mavis-Liang/pda_project3 (github.com)](https://github.com/Mavis-Liang/pda_project3)
+
 # Introduction
 
 The primary interest in predictive modeling often lies in its application to specific target populations. Consider, for instance, a healthcare system aiming to utilize a risk prediction model for identifying patients at elevated risk of cardiovascular incidents within its care network. The model is built using the source population and the model to be applied to the target population. A pertinent example is the Framingham ATP-III model [@ATP_III], widely employed to forecast the 10-year risk of cardiovascular events. In this context, a thorough understanding and application of the source model eligibility criteria to the target cohort is an essential component of the research.
@@ -38,7 +39,7 @@ In light of these challenges, recent years have seen the emergence of various me
 
 However, in practice, we sometimes face the problem of not getting access to the individual data; Instead, we only have the summary data. In this case, if we still want to use our model to predict the outcome of a specific individual, we still have to assess if the model is applicable to the target population. But without the individual data, using only the summary statistics to create a psudo-individual dataset to assess the transportibility, if this transportibility is reliable raises a new question.
 
-In our analysis, we first built a risk score model developed from the Framingham Heart Study data, then we assess whether the transportability of this  model to the simulated population based on the NAHNES (National Health and Nutrition Examination Survey) data, attains the similar transportibility as to the true population of NAHNES.
+In our analysis, we first built a risk score model developed from the Framingham Heart Study data, then we assess whether the transportability of this model to the simulated population based on the NAHNES (National Health and Nutrition Examination Survey) data, attains the similar transportibility as to the true population of NAHNES.
 
 # DATA
 
@@ -52,9 +53,9 @@ The ultimate dataset contain 2539 individuals and 10 variables, which are (1) CV
 
 ## NHANES data
 
-In this study,  we'll use the NHANES (National Health and Nutrition Examination Survey) data as our target population. NHANES is a program of studies designed to assess the health and nutritional status of adults and children in the United States, which data set is renowned for its comprehensive health and nutritional information collected from a diverse cross-section of the U.S. population. The NHANES interview includes demographic, socioeconomic, dietary, and health-related questions. The examination component consists of medical, dental, and physiological measurements, as well as laboratory tests administered by highly trained medical personnel. The decision to use NHANES data, with its representation of a multi-ethnic population, addressed a critical aspect of model transportability – the evaluation of a prediction model’s performance across diverse population groups
+In this study, we'll use the NHANES (National Health and Nutrition Examination Survey) data as our target population. NHANES is a program of studies designed to assess the health and nutritional status of adults and children in the United States, which data set is renowned for its comprehensive health and nutritional information collected from a diverse cross-section of the U.S. population. The NHANES interview includes demographic, socioeconomic, dietary, and health-related questions. The examination component consists of medical, dental, and physiological measurements, as well as laboratory tests administered by highly trained medical personnel. The decision to use NHANES data, with its representation of a multi-ethnic population, addressed a critical aspect of model transportability -- the evaluation of a prediction model's performance across diverse population groups
 
-To align with the eligibility criteria of the Framingham model, we selected the same variables as in the Framingham dataset and processed them in the same way as the Framingham variables. As in the Framingham study, only participant aging 32 or more will be included, we include a crucial step in the data preparation process involved filtering the NHANES dataset based on age, which enables a more accurate and meaningful comparison between the two datasets. We also remove the missing values in this data in concordance with the source population, where the missingness is relatively small (~30\%).
+To align with the eligibility criteria of the Framingham model, we selected the same variables as in the Framingham dataset and processed them in the same way as the Framingham variables. As in the Framingham study, only participant aging 32 or more will be included, we include a crucial step in the data preparation process involved filtering the NHANES dataset based on age, which enables a more accurate and meaningful comparison between the two datasets. We also remove the missing values in this data in concordance with the source population, where the missingness is relatively small (\~30%).
 
 The final NHANES dataset contains 3388 individuals and 9 variables. Outcome (CVD) is unavailable in this data.
 
@@ -228,18 +229,15 @@ cal_brier <- function(mod, df_test_target, df_test_source){
 }
 ```
 
-
 ## Simulation analysis
 
 We use the ADEMP framework [@sim_study] to explain the simulation:
 
-**Aims: ** 
-To evaluate the difference of the transportibility brier scores between the simulating NHANES data and actual NHANES data, we generate individual datasets with the summary statistics provided by the NHANES data, with different underlying assumptions: (1) The covariates are independently and log-normal distributed; (2) The covariates are normally distributed, and the correlations are informed by the Framingham data; (3) The covariates are log-normally distributed, and the correlations are informed by the Framingham data.
+**Aims:** To evaluate the difference of the transportibility brier scores between the simulating NHANES data and actual NHANES data, we generate individual datasets with the summary statistics provided by the NHANES data, with different underlying assumptions: (1) The covariates are independently and log-normal distributed; (2) The covariates are normally distributed, and the correlations are informed by the Framingham data; (3) The covariates are log-normally distributed, and the correlations are informed by the Framingham data.
 
-**Data-generating mechanisms: **
-The NHANES dataset's summary statistics (Table 1), including the mean and standard deviation for continuous variables and percentages for categorical variables, serve as the foundation for our data generation. For each gender group ('MEN' and 'WOMEN'), variables of HDLC, TOTCHOL, AGE, SYSBP_UT, and SYSBP_T are randomly generated, following log-normal distributions or normal distributions with or without correlation (explained in the 3 scenarios below). Categorical variables such as BPMEDS, CURSMOKE, and DIABETES are generated using their respective proportions in the NHANES data. We note that The SYSBP_UT and SYSBP_T variables are conditionally adjusted based on the BPMEDS status, in concordance with how we processes the variables to fit the risk model. We use the sample sizes of NHANES data as the size of data we simulate. 
+**Data-generating mechanisms:** The NHANES dataset's summary statistics (Table 1), including the mean and standard deviation for continuous variables and percentages for categorical variables, serve as the foundation for our data generation. For each gender group ('MEN' and 'WOMEN'), variables of HDLC, TOTCHOL, AGE, SYSBP_UT, and SYSBP_T are randomly generated, following log-normal distributions or normal distributions with or without correlation (explained in the 3 scenarios below). Categorical variables such as BPMEDS, CURSMOKE, and DIABETES are generated using their respective proportions in the NHANES data. We note that The SYSBP_UT and SYSBP_T variables are conditionally adjusted based on the BPMEDS status, in concordance with how we processes the variables to fit the risk model. We use the sample sizes of NHANES data as the size of data we simulate.
 
-We generate the continous variables in three different settings: 
+We generate the continous variables in three different settings:
 
 (1) All the continous variables are independently (except for SYSBP_UT and SYSBP_T) and log-normally distributed with parameters $\mu$ and $\sigma$). Parameters $\mu$ and $\sigma$ are derived from the sample mean and sample standard deviation of the NHANES data($\mu=ln\left(\frac{\mu_X^2}{\sqrt{\mu_X^2+\sigma_X^2}}\right)$, $\sigma^2 =ln \left( 1+\frac{\sigma_X^2}{\mu_X^2}\right)$, where $\mu_X^2$ and $\sigma_X^2$ is the sample mean and sample variance).
 
@@ -249,14 +247,11 @@ We generate the continous variables in three different settings:
 
 We simulate each data 50 times respectively to account for simulation variance.
 
-**Estimands: **
-We estimate the brier scores of the three settings, which represents a transportability-adjusted measure of the model's prediction accuracy in the simulated target population.
+**Estimands:** We estimate the brier scores of the three settings, which represents a transportability-adjusted measure of the model's prediction accuracy in the simulated target population.
 
-**Methods: **
-The transportability Brier score of the simulated dataset is calculated in the same way we calculate the Brier score for the actual NHANES data.
+**Methods:** The transportability Brier score of the simulated dataset is calculated in the same way we calculate the Brier score for the actual NHANES data.
 
-**Performance measures: **
-The efficacy of the simulation under various settings is gauged by comparing the simulated Brier scores to the 'true' Brier score, which is calculated using individual-level NHANES data. We average the brier scores accross different simulations rounds for the three settings respectively to get the final brier scores and the standard deviations. This comparison helps determine the robustness of our model to the data without individual data.
+**Performance measures:** The efficacy of the simulation under various settings is gauged by comparing the simulated Brier scores to the 'true' Brier score, which is calculated using individual-level NHANES data. We average the brier scores accross different simulations rounds for the three settings respectively to get the final brier scores and the standard deviations. This comparison helps determine the robustness of our model to the data without individual data.
 
 # Results
 
@@ -345,9 +340,9 @@ summary_tb %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-Figure 1 in the report illustrates the distribution of variables in the Framingham and NHANES populations, stratified by sex. The continuous variables are log-transformed for this analysis. The HDLC, SYSBP_T, SYSBP_UT and TOTCHOL variables appear to be log-normally distributed in both populations, which justify our model building. However, the AGE variable appears to be a uniform distribution or a normal distribution with high variance. 
+Figure 1 in the report illustrates the distribution of variables in the Framingham and NHANES populations, stratified by sex. The continuous variables are log-transformed for this analysis. The HDLC, SYSBP_T, SYSBP_UT and TOTCHOL variables appear to be log-normally distributed in both populations, which justify our model building. However, the AGE variable appears to be a uniform distribution or a normal distribution with high variance.
 
-It's noted that the NHANES population generally appears healthier than the Framingham population, as indicated by a wider age range, higher HDLCs, smaller Total Cholesterols, higher proportions of non-smokers and higher-proportion of non-diabetes. These is reasonable since in, the Framingham data we used, most participants have an age larger than 47, except for a few that has encounter CVD before the 15th years since the Framingham study begins. 
+It's noted that the NHANES population generally appears healthier than the Framingham population, as indicated by a wider age range, higher HDLCs, smaller Total Cholesterols, higher proportions of non-smokers and higher-proportion of non-diabetes. These is reasonable since in, the Framingham data we used, most participants have an age larger than 47, except for a few that has encounter CVD before the 15th years since the Framingham study begins.
 
 Table 1 provides summary statistics for the NHANES data, detailing mean and standard deviation for continous variables and percentages for categorical variables such as CURSMOKE, DIABETES, and BPMEDS. The mean and standard deviations of SYSBP_UT are calculated with only those that have a BPMEDS = 0, and then mean and standar deviations of SYSBP_T are calculated with only those that have a BPMEDS = 1. The summary statistics in Table 1 is then used to generate the simulation datasets.
 
@@ -491,14 +486,14 @@ The results combined suggest an overall good transportibility from the Framingha
 
 **Methodological Considerations:** The use of log-transformed variables and handling of categorical variables like BPMEDS, CURSMOKE, and DIABETES provide methodological insights into dealing with diverse data types in predictive modeling.
 
-**Limitations and Future Work:**
-To further investigate if we can assess transportibility without real data, using only summary statistics of the data, we should do the same analysis with different datasets besides NHANES, preferably with a true outcome variable.
+**Limitations and Future Work:** To further investigate if we can assess transportibility without real data, using only summary statistics of the data, we should do the same analysis with different datasets besides NHANES, preferably with a true outcome variable.
 
 \newpage
 
 # Reference
 
-<div id="refs"></div>
+::: {#refs}
+:::
 
 \newpage
 
