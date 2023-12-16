@@ -203,6 +203,16 @@ We only use complete cases in NHANES for comparability and consistency with the 
 
 We then calculate the estimated brier score for the risk model in the NHANES data. This is done by adjusting the Brier score calculation based on the probability of each observation belonging to the source population, as estimated by a logistic regression model, so that the differences between the source and target populations is taken into account [@10.1093/aje/kwac128]. The calculation involves the following steps: (1) *Estimation of Source Membership Probability:* A logistic regression model is fitted to predict the probability of each observation in the combined dataset belonging to the source population. The model uses the same set of predictors as the primary predictive model (log-transformed continuous variables and categorical variables). (2) *Calculation of Inverse Odds:* Inverse odds for each entry of the data $\hat{o}(X_i)$ is derived from the fitted probabilities $\frac{1-p}{p}$ of belonging to the source data. (3) *Model Prediction:* Predictions for the probability of CVD are made for the source dataset using the primary predictive model. (4) *Brier Score Computation:* The estimated brier score for the NHANES data is calculated using the squared differences between the predicted probabilities (of CVD) and the actual outcomes of the Framingham data in the test set. These differences are weighted by the inverse odds, focusing the calculation on how well the model predicts the source population's outcomes. The final score is normalized by the number of observations in the target popupations.
 
+Inverse Odds:
+$$
+\hat{o}(X_i)=\frac{Pr[S=0|X,D_{test}=1]}{Pr[S=1|X,D_{test}=1]}
+$$
+
+Estimated Brier score
+$$
+\hat{\psi}_{\beta} = \frac{\sum_{i=1}^{n} I(S_i = 1, D_{\text{test},i} = 1)\hat{o}(X_i)(Y_i - g_{\beta}(X_i))^2}{\sum_{i=1}^{n} I(S_i = 0, D_{\text{test},i} = 1)}
+$$
+
 The estimated Brier score we obtain represents a transportability-adjusted measure of the model's prediction accuracy in the source population.
 
 ```{r transportibility-function}
@@ -211,6 +221,8 @@ The estimated Brier score we obtain represents a transportability-adjusted measu
 #' @param mod The model that built with the training set
 #' @param df_test_target The target test set. True CVD is not needed.
 #' @param df_test_source The source test set. True CVD is needed.
+#' 
+#' @return Transportibility brier score
 cal_brier <- function(mod, df_test_target, df_test_source){
   df_test_target <- df_test_target%>% mutate(S=0)
   df_test_source <- df_test_source%>% mutate(S=1)
@@ -241,7 +253,7 @@ We generate the continous variables in three different settings:
 
 (1) All the continous variables are independently (except for SYSBP_UT and SYSBP_T) and log-normally distributed with parameters $\mu$ and $\sigma$). Parameters $\mu$ and $\sigma$ are derived from the sample mean and sample standard deviation of the NHANES data($\mu=ln\left(\frac{\mu_X^2}{\sqrt{\mu_X^2+\sigma_X^2}}\right)$, $\sigma^2 =ln \left( 1+\frac{\sigma_X^2}{\mu_X^2}\right)$, where $\mu_X^2$ and $\sigma_X^2$ is the sample mean and sample variance).
 
-(2) The continuous variables are normally ditributed with the parameters $\mu$ and $\sigma$ equals to the sample means and sample deviation of the NHANES data. The correlation among the variables are informed by the Framingham data. (We use the covariance matrix of the Framingham data).
+(2) The continuous variables are normally ditributed with the parameters $\mu$ and $\sigma$ equals to the sample means and sample deviation of the NHANES data. The correlation among the variables are informed by the Framingham data. (We use the covariance matrix of the Framingham data). Specifically, the binary variables are also incorporated in the covariance matrix. Binary variables are generated with normal distributions, where the mean and SD is from the summary of NHANES. The probabilities are then transformed back.
 
 (3) The continuous variables are log-normally distributed with the parameters calculated the same ways as (1). The correlation of the log-normal variables are informed by the Framingham data. (We use the covariance matrix of the log-transformed continuous variables in the Framingham data.)
 
@@ -357,8 +369,22 @@ brier_test_women  <- cal_brier(mod = mod_women,
 ```
 
 ```{r simulation_function}
-# Based on the summary statistics from the createTableOne_object of the NHANES data, a dataset is generated, under different distribution assumptions.
+#' Simulate Data Based on Summary Statistics.
 sim_function <- function(createTableOne_object, method = "independent"){
+  #' This function generates a simulated dataset based on summary statistics
+#' obtained from a CreateTableOne object. The simulation can be done under 
+#' different distribution assumptions.
+#'
+#' @param createTableOne_object A CreateTableOne object containing summary statistics.
+#' @param method Method for generating data ('independent', 'cov', or 'normal').
+#'
+#' @return A dataframe of simulated data.
+#'
+#' @examples
+#' # sim_function(cto_object, method = "independent")
+#' # sim_function(cto_object, method = "cov")
+#'
+#' @export df The simulated dataset
   df <- NULL
   for (i in c("MEN", "WOMEN")) {
     mean <- createTableOne_object$ContTable[[i]][,"mean"]
@@ -389,15 +415,24 @@ sim_function <- function(createTableOne_object, method = "independent"){
       SYSBP_UT <- simulated_continous[, 4]
       SYSBP_T <- simulated_continous[, 5]
     }else if(method == "normal"){
-      cov_F <- cov(F_final %>% filter(SEX==i) %>% 
-                         dplyr::select("HDLC", "TOTCHOL", "AGE",
-                                    "SYSBP_UT", "SYSBP_T"))
-      simulated_continous <- as.data.frame <- mvrnorm(n,mean,cov_F)
-      HDLC <- simulated_continous[, 1]
-      TOTCHOL <- simulated_continous[,2]
-      AGE <- simulated_continous[,3]
-      SYSBP_UT <- simulated_continous[, 4]
-      SYSBP_T <- simulated_continous[, 5]
+      cov_F <- cov(F_final %>% 
+                     mutate(CURSMOKE = ifelse(CURSMOKE=="YES", 1, 0),
+                            DIABETES = ifelse(DIABETES=="YES", 1, 0)) %>% 
+                     filter(SEX==i) %>% 
+                     dplyr::select(-c("SEX", "CVD")))
+      mean <- c(mean, prop_CURSMOKE,
+                prop_DIABETES)
+      
+      simulated_all <- as.data.frame <- mvrnorm(n,mean,cov_F)
+      HDLC <- simulated_all[, 1]
+      TOTCHOL <- simulated_all[,2]
+      AGE <- simulated_all[,3]
+      SYSBP_UT <- simulated_all[, 4]
+      SYSBP_T <- simulated_all[, 5]
+      CURSMOKE <- simulated_all[, 6]
+      CURSMOKE <- ifelse(CURSMOKE > qnorm(prop_CURSMOKE), "YES", "NO")
+      DIABETES <- simulated_all[, 7]
+      DIABETES <- ifelse(DIABETES > qnorm(prop_DIABETES), "YES", "NO")
     }
     
     
@@ -406,13 +441,18 @@ sim_function <- function(createTableOne_object, method = "independent"){
     SYSBP_UT = ifelse(BPMEDS=="NO", SYSBP_UT, 0)
     SYSBP_T = ifelse(BPMEDS=="YES", SYSBP_T, 0)
     
-    CURSMOKE = sample(c("YES", "NO"), size = n, replace = TRUE, 
+    if(method != "normal"){
+      CURSMOKE = sample(c("YES", "NO"), size = n, replace = TRUE, 
                      prob = c(prop_CURSMOKE, 1 - prop_CURSMOKE))
-    DIABETES = sample(c("YES", "NO"), size = n, replace = TRUE, 
+      DIABETES = sample(c("YES", "NO"), size = n, replace = TRUE, 
                      prob = c(prop_DIABETES, 1 - prop_DIABETES))
+    }
+    
     
     df <- rbind(df, data.frame(HDLC, TOTCHOL,AGE, SYSBP_UT, 
                      SYSBP_T, CURSMOKE, DIABETES, SEX=i))
+    
+    df <- df %>% filter(AGE>=32)
     
   }
   return(df)
@@ -421,6 +461,23 @@ sim_function <- function(createTableOne_object, method = "independent"){
 
 ```{r simulation}
 sim_ntimes <- function(sim, method="independent", n){
+#' This function runs multiple simulations of data generation and calculates Brier scores for each simulation.
+#' It is designed to evaluate the consistency and reliability of the model's performance over repeated simulations.
+#'
+#' @param sim Function used for simulating data.
+#' @param method Method for generating data ('independent', 'cov', or 'normal').
+#' @param n Number of times to run the simulation.
+#'
+#' @return A list containing the mean and standard deviation of the Brier scores for both men and women.
+#'
+#' @examples
+#' # sim_ntimes(sim_function, method = "independent", n = 50)
+#' # sim_ntimes(sim_function, method = "cov", n = 50)
+#'
+#' @export mean_sim_brier_MEN the transportibility brier score for MEN
+#' @export sd_sim_brier_MEN standard deviation of the brier score for MEN
+#' @export mean_sim_brier_WOMEN the transportibility brier score for WOMEN
+#' @export sd_sim_brier_WOMEN standard deviation of the brier score for WOMEN
   brier_sim_men <- NULL
   brier_sim_women <- NULL
   for (i in 1:n) {
@@ -464,8 +521,6 @@ data.frame(Framingham = c(brier_train_men, brier_train_women),
   kable(format = "latex", booktabs = TRUE,
         caption = "Estimated Brier Scores") %>%
   kable_styling(latex_options = c("striped", "hold_position"))
-
-
 ```
 
 Table 2 shows the Brier scores for different scenarios: the original Framingham model, the NHANES data, and three simulation settings. These scores offer insights into the predictive accuracy of the cardiovascular risk model across different datasets and simulation assumptions.
