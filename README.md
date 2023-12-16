@@ -28,16 +28,6 @@ methodology, results, and discussion.
 
 `README.md`
 
-
-## Data
-
-The data used in this project is derived from two main sources:
-
-The Framingham Heart Study dataset, which was used to develop the
-original cardiovascular risk model. The NHANES (National Health and
-Nutrition Examination Survey) dataset, which was used to test the
-model's transportability.
-
 ## Key Components
 
 **Data Processing**: Scripts for preparing and cleaning the Framingham
@@ -65,11 +55,11 @@ To replicate the analysis, follow these steps:
 
 -   Clone the repository to your local machine.
 -   Ensure you have R and the necessary packages installed.
--   Run the qmd.
+-   Run the QMD.
 
 ## Dependencies
 
-R packages: dplyr, ggplot2, MASS, tableone.
+R packages: dplyr, ggplot2, MASS, tableone, ect.
 
 ## Acknowledgments
 
