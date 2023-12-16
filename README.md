@@ -16,10 +16,15 @@ transportability.
 
 ## Repository Structure
 
-.
-├── figures # Figures and plots generated from the analysis
+
+figures # the folders that contain figures and plots generated from the analysis
+
 report.qmd # qmd files 
+
+cite.bib # Bibliography that is embedded in the QMD file.
+
 report.pdf # Final report document (PDF format)
+
 README.md
 
 `report3.pdf`: Comprehensive report of the study's findings, including
@@ -71,6 +76,6 @@ R packages: dplyr, ggplot2, MASS, tableone.
 
 Dr. Jon Steingrimsson from the Biostatistics Department for collaboration.
 
-The Framingham Heart Study for providing the dataset to develop the initial model.
+The Framingham Heart Study provides the dataset to develop the initial model.
 
 The Centers for Disease Control and Prevention (CDC) for making the NHANES data publicly available.
