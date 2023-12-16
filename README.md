@@ -1,16 +1,10 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # Transportability Analysis of Cardiovascular Risk Prediction Models
 
 This repository contains the resources and code used for conducting a
 transportability analysis of cardiovascular risk prediction models.
 Specifically, it examines the performance of a model developed using
 data from the Framingham Heart Study when applied to a different
-population represented in the NHANES dataset.
+the population represented in the NHANES dataset.
 
 ## Project Overview
 
@@ -23,15 +17,9 @@ transportability.
 ## Repository Structure
 
 .
-
-├── figures \# Figures and plots generated from the analysis
-(placeholders included)
-\
-report.qmd \# qmd files 
-
-report.pdf \# Final report document (PDF
-format)
-
+├── figures # Figures and plots generated from the analysis
+report.qmd # qmd files 
+report.pdf # Final report document (PDF format)
 README.md
 
 `report3.pdf`: Comprehensive report of the study's findings, including
