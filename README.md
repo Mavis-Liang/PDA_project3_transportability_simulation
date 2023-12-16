@@ -17,18 +17,17 @@ transportability.
 ## Repository Structure
 
 
-figures # the folders that contain figures and plots generated from the analysis
+`./figures` # the folders that contain figures and plots generated from the analysis
 
-report.qmd # qmd files 
+`report.qmd` # qmd files 
 
-cite.bib # Bibliography that is embedded in the QMD file.
+`cite.bib` # Bibliography that is embedded in the QMD file.
 
-report.pdf # Final report document (PDF format)
-
-README.md
-
-`report3.pdf`: Comprehensive report of the study's findings, including
+`report.pdf` # Final report document. Comprehensive report of the study's findings, including
 methodology, results, and discussion.
+
+`README.md`
+
 
 ## Data
 
